@@ -1,5 +1,5 @@
 \documentclass[11pt]{article}
-\usepackage{fullpage,graphicx,hyperref}
+\usepackage{fullpage,graphicx,hyperref,amsmath}
 \newcommand{\fig}[2]{\begin{figure}[h]\begin{center}%
   \includegraphics[scale=#2]{#1.pdf}\end{center}%
   \end{figure}}
@@ -36,8 +36,51 @@ Here, $f,g$ are given functions that can be evaluated in constant time.
 (i) Write pseudocode to evaluate $C(\lfloor n/2\rfloor,1)$ using dynamic programming, and (ii) analyze the running time and space as a function of $n$.
 \end{enumerate}
 
+\textbf{Solution:}
+\begin{enumerate}
+  \item[(a)] Pseudocode:
+\end{enumerate}
+\begin{verbatim}
+    C = [[0] * (n+1)] * 3
+    for j in range(1, n+1):      # iterate j in increasing order
+      roll C
+      for i in range(n, 0, -1):  # iterate i in decreasing order
+        term1 = C[1][i-1] if (i-1>0 and j-1>0) else 0
+        term2 = C[0][i+2] if (i+2<=n and j-2>0) else 0
+        term3 = C[2][i+j] if i+j<=n else 0
+        C[2][i] = max(term1, term2, term3)
+    return C[2][n]
+\end{verbatim}
+\begin{enumerate}
+  \item[] Time complexity is $O(n^2)$.
+  
+  Space complexity is $O(n)$ using rolling array.
 
-\bigskip
+  \medskip
+  \item[(b)] Pseudocode:
+\end{enumerate}
+\begin{verbatim}
+    C = [[0] * n for _ in range(n)]
+    root = n / 2
+    for j in range(n, 0, -1):       
+    # evaluate from right to left
+      for i in range(min(n-j, root), 0, -1):   
+        # evaluate from two sides to center
+        C[root-i][j+i] = evaluate_min(C, root-i, j)
+        C[root+i][j+i] = evaluate_min(C, root+i, j)
+      C[root][j] = evaluate_min(C, root, j)
+    return C[root][1]
+\end{verbatim}
+\begin{enumerate}
+  \item[] Iteration takes $O(n^2)$ steps, each step takes $O(n)$ time to evaluate minimum value, 
+  total time complexity is $O(n^3)$.
+
+  Space complexity is $O(n^2)$.
+\end{enumerate}
+
+
+
+\newpage
 \item[Problem 2.2:]
 Recall the following formulation of the \emph{line break} problem from class:
 given a sequence of positive integers $\langle a_1,\ldots,a_n\rangle$ and a number $L$,
@@ -77,7 +120,72 @@ And you do not need to write pseudocode to
 output the optimal solution; just the optimal value suffices.
 \end{enumerate}
 
-\bigskip
+\textbf{Solution:}
+\begin{enumerate}
+\item[(a)]
+  \begin{enumerate}
+    \item[(i)] Subproblems:
+    
+    For each $i = 1, 2, \ldots, n$, define,
+    \[
+      P(i) = \text{minimum penalty for subsequence } \langle a_i,\ldots,a_n\rangle.
+    \]
+    Want $P(0)$.
+
+    \item[(ii)] Recursive formula:
+    \[
+      P(i) = \min_{\substack{j \in (i+1,\ldots,n) \\ 
+      i_j-i_{j-1}\le 10 \text{ for all } j=1,\ldots,k-1 \\ 
+      i_k-i_{k-1}\le 5 \\ \alpha < L}}(P(j) + f(L - \alpha)),
+    \]
+    where $\alpha = \sum_{m=i+1}^{j}a_m$. Base case is $P(n+1) = 0$.
+
+    \item[(iii)] Evaluation order:
+
+    Pre-compute $S(i) = \sum_{m=i+1}^{n}a_m$, then evaluate $P(i)$ from $n$ to 1.
+
+    \item[(iv)] Time and space analysis:
+    
+    Iteration takes $O(n)$ steps, each step evaluates $P(j)$ and $f(L - \alpha)$ in 
+    $O(1)$ time with pre-computed $S(i)$, total time complexity is $O(n)$.
+
+    $P(i)$ and $S(i)$ both take $O(n)$ space, total space complexity is $O(n)$.
+  \end{enumerate}
+
+\item[(b)]
+  \begin{enumerate}
+    \item[(i)] Subproblems:
+    
+    For each $i = 1, 2, \ldots, m$ and $j = 1, 2, \ldots, n$, define,
+    \[
+      P(i, j) = \text{minimum penalty for the $i$th subsequence ending at $a_j$}.
+    \]
+    Want $P(m, n)$.
+
+    \item[(ii)] Recursive formula:
+    \[
+      P(i, j) = 
+      \min_{\substack{u \in (1, 2, \ldots, j) \\ \alpha < L}}(P(i-1, u) + f(L - \alpha)),
+    \]
+    where $\alpha = \sum_{m=u+1}^{j}a_m$. Base case is $P(0, 0)=0$, $P(0, j)=+\infty$ for 
+    $j = 1, 2, \ldots, n$.
+
+    \item[(iii)] Evaluation order:
+
+    Pre-compute $S(i) = \sum_{v=i+1}^{n}a_v$, then evaluate $i$ from 1 to $m$, with each $i$, 
+    evaluate $j$ from 1 to $n$.
+
+    \item[(iv)] Time and space analysis:
+    
+    Iteration takes $O(mn)$ steps, each step evaluates minimum for $O(n)$ times, each 
+    evaluation takes $O(1)$ time with pre-computed $S(i)$, total time complexity is $O(mn^2)$.
+
+    $P(i, j)$ takes $O(mn)$ space (or $O(n)$ space by using rolling array), $S(i)$ takes $O(n)$ space, total space complexity is $O(n)$.
+  \end{enumerate}
+
+\end{enumerate}
+
+\newpage
 \item[Problem 2.3:]
 We have an ordered list of $n$ customers, all arriving at time 0 (i.e., the time when the store opens).
 We have 3 servers.  For each $i=1,\ldots,n$,
@@ -105,6 +213,93 @@ and (vi)~analyze the running time and space as a function of $n$ and $L$.
 [Hint: define a class of subproblems with 4
 parameters (the number of subproblems may be a function of both $n$ and $L$)\ldots]
 
+
+\textbf{Solution:}
+\begin{enumerate}
+  \item[(i)] Subproblems:
+
+  For each $i=1,\ldots,n$, define
+  \begin{equation*}
+  \begin{aligned}
+    P(i, s_{1_i}, s_{2_i}) = & \text{ minimum total waiting time when } \\ 
+    & \text{ each server's serving time is $s_{1_i}, s_{2_i}, s_{3_i}$} \\ 
+    & \text{ after customer $i$},
+  \end{aligned}
+  \end{equation*}
+  subject to
+  \[
+    s_{1_i} + s_{2_i} + s_{3_i} = \sum_{k=0}^{i}\ell_k.
+  \]
+  Want
+  \[
+    \min_{\substack{s_1, s_2 \in (0,\ldots,nL)}}P(n, s_1, s_2).
+  \]
+
+  \item[(ii)] Recursive formula:
+
+  For all $i=1,\ldots,n$,
+  \[
+    P(i, s_{1_i} + \ell_i, s_{2_i}) = \min\{P(i, s_{1_i} + \ell_i, s_{2_i}), P(i-1, s_{1_i}, s_{2_i}) + s_{1_i}\},
+  \]
+  \[
+    P(i, s_{1_i}, s_{2_i} + \ell_i) = \min\{P(i, s_{1_i}, s_{2_i} + \ell_i), P(i-1, s_{1_i}, s_{2_i}) + s_{2_i}\},
+  \]
+  \[
+    P(i, s_{1_i}, s_{2_i}) = \min\{P(i, s_{1_i}, s_{2_i}), P(i-1, s_{1_i}, s_{2_i}) + s_{3_i}\},
+  \]
+  where
+  \[
+    s_{3_i} = \sum_{k=0}^{i}\ell_k - s_{1_i} - s_{2_i}.
+  \]
+
+  Base case is $P(0, 0, 0) = 0$.
+
+  \item[(iii)] Evaluation order:
+  
+  Evaluate $i$ from 1 to $n$, evaluate $s_1$, $s_2$ from 0 to $nL$, 
+  for each $(i, s_1, s_2)$, evaluate 
+  $P(i, s_{1_i} + \ell_i, s_{2_i})$, 
+  $P(i, s_{1_i}, s_{2_i} + \ell_i)$ and 
+  $P(i, s_{1_i}, s_{2_i})$.
+
+  \item[(iv)] Optimal value:
+\end{enumerate}
+\begin{verbatim}
+    L = pre-computed sum(\ell_i)
+    P = array of size (2, nL, nL) initiated with +inf
+    S = array of size (n+1, nL, nL) preserving 
+        previous state (s1, s2) and assignment k
+    P[0][0][0] = 0
+    for i = 1 to n+1:
+      roll P
+      for s1 = 0 to n*L:
+        for s2 = 0 to n*L:
+          if P[i][s1][s2] != +inf:
+            evaluate P according to step (ii)
+            update S
+    return minmum value of P[n]
+\end{verbatim}
+\begin{enumerate}
+  \item[(v)] Optimal solution:
+\end{enumerate}
+\begin{verbatim}
+    state = optimal state of n (k_n, s1_n, s2_n)
+    assignment = [0]*n + [k_n]
+    for i = n to 1:
+      previous_state, assignment[i] = S[k_i][s1_i][s2_i]
+      state = previous_state
+    return assignment
+\end{verbatim}
+\begin{enumerate}
+  \item[(vi)] Time and space analysis:
+  
+  Iteration takes $O(n \times (nL)^2)$ steps, each step takes $O(1)$ time to evaluate $P$
+  and record state and assignment $S$, optimal solution takes extra $O(n)$ time, total time complexity 
+  is $O(n^3L^2)$.
+
+  $P$ takes $O((nL)^2)$ space using rolling array, $S$ takes $O(n\times(nL)^2)$ space, total space 
+  complexity is $O(n^3L^2)$. If optimal solution is not needed, total space complexity is $O(n^2L^2)$.
+\end{enumerate}
 
 \end{description}
 \end{document}
