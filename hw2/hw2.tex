@@ -214,7 +214,7 @@ and (vi)~analyze the running time and space as a function of $n$ and $L$.
 parameters (the number of subproblems may be a function of both $n$ and $L$)\ldots]
 
 
-\textbf{Solution:}
+\textbf{Basic Solution:}
 \begin{enumerate}
   \item[(i)] Subproblems:
 
@@ -260,33 +260,37 @@ parameters (the number of subproblems may be a function of both $n$ and $L$)\ldo
   for each $(i, s_1, s_2)$, evaluate 
   $P(i, s_{1_i} + \ell_i, s_{2_i})$, 
   $P(i, s_{1_i}, s_{2_i} + \ell_i)$ and 
-  $P(i, s_{1_i}, s_{2_i})$.
+  $P(i, s_{1_i}, s_{2_i})$ iff
+  $(i-1, s_{1_i}, s_{2_i})$ is reachable.
 
   \item[(iv)] Optimal value:
 \end{enumerate}
 \begin{verbatim}
     L = pre-computed sum(\ell_i)
     P = array of size (2, nL, nL) initiated with +inf
-    S = array of size (n+1, nL, nL) preserving 
-        previous state (s1, s2) and assignment k
+    S = array of size (n+1, nL, nL) of previous state (s1, s2)
     P[0][0][0] = 0
-    for i = 1 to n+1:
+    for i = 1 to n:
       roll P
       for s1 = 0 to n*L:
         for s2 = 0 to n*L:
-          if P[i][s1][s2] != +inf:
+          if P[i-1][s1][s2] != +inf:  # previous state is reachable
             evaluate P according to step (ii)
             update S
     return minmum value of P[n]
+           optimal state if optimal solution is needed
 \end{verbatim}
 \begin{enumerate}
   \item[(v)] Optimal solution:
 \end{enumerate}
 \begin{verbatim}
-    state = optimal state of n (k_n, s1_n, s2_n)
-    assignment = [0]*n + [k_n]
+    state = optimal state of n (s1_n, s2_n)
+    assignment = [0]*n
     for i = n to 1:
-      previous_state, assignment[i] = S[k_i][s1_i][s2_i]
+      previous_state = S[k_i][s1_i][s2_i]
+      # get assignment by comparing server time
+      assignment[i] = k of any sk whose serve time is different 
+                      between the states, k=3 otherwise
       state = previous_state
     return assignment
 \end{verbatim}
@@ -299,6 +303,56 @@ parameters (the number of subproblems may be a function of both $n$ and $L$)\ldo
 
   $P$ takes $O((nL)^2)$ space using rolling array, $S$ takes $O(n\times(nL)^2)$ space, total space 
   complexity is $O(n^3L^2)$. If optimal solution is not needed, total space complexity is $O(n^2L^2)$.
+\end{enumerate}
+
+\medskip
+\textbf{Bonus Solution:}
+\begin{enumerate}
+  \item[] Idea: Only record possible states using hash table.
+  \item[(i\&ii)] Same.
+  \item[(iii)] Evaluation order:
+
+  Evaluate $i$ from 1 to n, for each possible previous states of $(i-1, s_1, s_2)$, evaluate
+  $(i, s_1, s_2)$ according to step (ii).
+
+  \item[(iv)] Optimal value:
+\end{enumerate}
+\begin{verbatim}
+    L = pre-computed sum(\ell_i)
+    P_pre = hash table {state(s1, s2): total waiting time} 
+            of previous customer
+    P_cur = hash table {state(s1, s2): total waiting time} 
+            of current customer
+    S = hash table {state(i, s1, s2): 
+        previous state(i-1, s1_prev, s2_prev)}
+    P_cur[(0, 0)] = 0
+    for i = 1 to n:
+      P_pre = P_cur, clear P_cur
+      for each state in keys of P_pre:
+        evaluate P according to step (ii), update P_cur
+        update S
+    return minimum value in values of P_cur, 
+           optimal state if optimal solution is needed
+\end{verbatim}
+\begin{enumerate}
+  \item[(v)] Optimal solution:
+\end{enumerate}
+\begin{verbatim}
+    state = optimal state of n (s1_n, s2_n)
+    assignment = [0]*n
+    for i = n to 1:
+      previous_state = S[(i, s1_i, s2_i)]
+      # get assignment by comparing server time
+      assignment[i] = k of any sk whose serve time is different 
+                      between the states, k=3 otherwise
+      state = previous_state
+    return assignment
+\end{verbatim}
+\begin{enumerate}
+  \item[(vi)] Time and space analysis:
+  
+  Iteration takes $O(n)$ steps, each step evaluates $O(n^2)$??? states, $O(1)$ time using
+  hash table, 
 \end{enumerate}
 
 \end{description}
