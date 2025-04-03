@@ -1,5 +1,5 @@
 \documentclass[11pt]{article}
-\usepackage{fullpage,amssymb,graphicx,hyperref,xcolor}
+\usepackage{fullpage,amssymb,graphicx,hyperref,xcolor,algorithm,algpseudocodex,amsmath}
 
 \newcommand{\fig}[2]{\begin{figure}[ht]\begin{center}%
   \includegraphics[scale=#2]{#1}\end{center}%
@@ -66,9 +66,129 @@ obviously, (b) is meant to help\ldots]
 \item[(d)] (15 pts) Now, describe an efficient Monte Carlo algorithm that has error probability at most $0.01$.  Analyze the worst-case running time as a function of $n$ and $k$.  When $k$ is small, it should be much faster than the algorithm in (a).
 \end{enumerate}
 
+\newpage
+\textbf{Solution:}
+\begin{enumerate}
+  \item[(a)] Brute force algorithm:
+  
+  \begin{algorithm}
+  \caption{}
+  \begin{algorithmic}[1]
+    \State Initialize $C^*$ as a circle with infinity radius.
+    \For{each triplet of points $(p_i, p_j, p_k)$ and pair of points $(p_i, p_j)$}
+      \State Construct the unique circle $C$ that passes through all three or two points.
+      \State Count the number of points inside or on the boundary of $C$.
+      \If{at least $n-k$ points are enclosed and the radius is smaller than $C^*$} 
+        \State $C^* = C$.
+      \EndIf
+    \EndFor
+    \State \Return{$C^*$}
+  \end{algorithmic}
+  \end{algorithm}
+
+  Complexity Analysis:
+
+  There are $\binom{n}{3} + \binom{n}{2} = O(n^3)$ triplets and pairs, 
+  so the number of candidate circles is at most $O(n^3)$.
+  Checking each circle takes $O(n)$ time to count the enclosed points.
+  Hence, the total runtime is $O(n^3) \times O(n) = O(n^4)$.
+
+  \item[(b)]
+  \[
+  B^*\subseteq R\subseteq S-Q^* \ \Leftrightarrow \
+  B^* \subseteq R \text{ and } Q^* \cap R = \emptyset
+  \]
+  Define two independent events:
+
+  Event $A$: All points in $B^*$ are included in $R$.
+
+  Event $B$: No points from $Q^*$ are included in $R$.
+
+  Since each point is independently selected with probability $1/k$:
+  \[
+  \Pr(A) = (1/k)^3 = 1/k^3.
+  \]
+  Similarly, the probability that none of the at most $k$ outlier points are selected is:
+  \[
+  \Pr(B) = (1 - 1/k)^k.
+  \]
+  Using the standard bound $(1 - 1/k)^k < 1/e$, $\Pr(B)$ remains a constant $\Theta(1)$.
+
+  Thus, the desired probability is:
+  \[
+  \Pr(B^* \subseteq R \text{ and } Q^* \cap R = \emptyset) = \Pr(A) \cdot \Pr(B) = \frac{1}{k^3} \cdot \Theta(1) = \Omega(1/k^3).
+  \]
+
+  (When $k=1$, we can sample each $p$ with probability 1/2 so the probability still satisfies $\Omega(1/k^3)$)
+
+  \item[(c)]
+  From part (b):
+  \[
+  \Pr(B^* \subseteq R \text{ and } Q^* \cap R = \emptyset) = \Omega(1/k^3).
+  \]
+  When this event occurs, 
+  the subset $R$ contains all necessary boundary points of $C^*$ 
+  and excludes all outliers. 
+  Consequently, the smallest enclosing circle computed from 
+  $R$ must be $C^*$ itself, which covers at least $n-k$ points. 
+  Thus, the algorithm produces the correct result 
+  with probability at least $\Omega(1/k^3)$.
+  \begin{algorithm}
+  \caption{}
+  \begin{algorithmic}[1]
+    \State Construct a random subset $R \subseteq S$ by including 
+    each point $p \in S$ independently with probability $1/k$. 
+    \State Use Welzl's algorithm to compute the smallest enclosing circle 
+    $C_R$ for the subset $R$.
+    \State \Return $C_R$
+  \end{algorithmic}
+  \end{algorithm}
+
+  Complexity Analysis:
+
+  Iterating over $S$ and independently deciding whether to 
+  include each point in $R$ takes $O(n)$ time. 
+  Given that the expected size of $R$ is $O(n/k)$, 
+  the smallest enclosing circle runs in $O(n)$ worst-case time.
+
+  \item[(d)]
+    Use the Monte Carlo algorithm from part (c) as a subroutine that, 
+    in one iteration, randomly construct $R$ and compute $C_R$.
+    Scan all points in $S$ to count how many lie inside or on the boundary of $C_R$. 
+    If at least $n-k$ points are contained, output $C_R$ as the solution; 
+    otherwise, declare this iteration a failure.
+    
+    Let $p$ be the probability that one iteration returns the correct circle. From part (b), 
+    \[
+    p = \Pr(B^* \subseteq R \text{ and } R\subseteq S-Q^*) = \Omega(1/k^3).
+    \]
+    In order to reduce the error probability to at most $0.01$, 
+    Repeat the above procedure $T$ times independently so that:
+    \[
+    (1-p)^T \le 0.01,
+    \]
+    we obtain,
+    \[
+    T \ge \left\lceil \frac{\ln 0.01}{\ln (1-p)} \right\rceil.
+    \]
+    From part (b), $p < 1/e$, thus $\ln(1-p) > -2p$, it suffices to take
+    \[
+    T = O\left(k^3\right).
+    \]
+
+    Complexity Analysis:
+
+    Each iteration runs in $O(n)$ worst-case time. 
+    Repeating the procedure $T = O(k^3)$ times gives 
+    an overall worst-case running time of $O(nk^3)$, 
+    which is much faster when $k$ is small.
+
+  \end{enumerate}
 
 
-\bigskip
+
+
+\newpage
 \item[Problem 6.2:]
 \newcommand{\AREA}{\mathop{\rm area}}
 We are given $n$ triangles $T_1,\ldots,T_n$ in 2D\@.
@@ -105,8 +225,106 @@ outputs a value $X$ between $0.99A$ and $1.01A$ with probability at least 0.99.
 we can compute the area of a triangle in $O(1)$ time, and we can test whether a point is inside a triangle in $O(1)$ time.  The above algorithm actually works for other types of objects besides triangles, and in dimension higher than 2.]
 \end{enumerate}
 
+\newpage
+\textbf{Solution:}
+\begin{enumerate}
+  \item[(a)]
+    For each triangle \( T_i \), define 
+    \[
+      X_i := \left|\{p_{i,1},\ldots,p_{i,r}\}\setminus (T_1\cup\cdots\cup T_{i-1})\right|
+      \cdot \frac{\AREA(T_i)}{r}.
+    \]
+    \[
+    a_i = \AREA\left(T_i\setminus (T_1\cup\cdots\cup T_{i-1})\right),
+    \]
+    Consider each random point \( p_{i,k} \) out of \( r \) points selected from \( T_i \). 
+    Since the points are sampled uniformly, 
+    the probability that \( p_{i,k} \) falls within the region 
+    \( T_i\setminus (T_1\cup\cdots\cup T_{i-1}) \) is  
+    \[
+    \Pr\left[p_{i,k}\in T_i\setminus (T_1\cup\cdots\cup T_{i-1})\right] 
+    = \frac{a_i}{\AREA(T_i)}.
+    \]
+    Each such point contributes \( \frac{\AREA(T_i)}{r} \), so its expected contribution is  
+    \[
+    \frac{\AREA(T_i)}{r} \cdot \frac{a_i}{\AREA(T_i)} = \frac{a_i}{r}.
+    \]
+    Since there are \( r \) points sampled from \( T_i \), 
+    the total expected contribution from \( T_i \) is  
+    \[
+    \mathbb{E}[X_i] = r\cdot \frac{a_i}{r} = a_i.
+    \]
+    By linearity of expectation, sum over all \( X_i \):
+    \[
+    \mathbb{E}[X] = \sum_{i=1}^n \mathbb{E}[X_i] = \sum_{i=1}^n a_i.
+    \]
+    The regions \( T_i\setminus (T_1\cup\cdots\cup T_{i-1}) \) 
+    are disjoint and collectively form \( T_1\cup\cdots\cup T_n \), 
+    by defination,
+    \[
+    \sum_{i=1}^n a_i = \AREA(T_1\cup\cdots\cup T_n) = A.
+    \]
 
-\bigskip
+  \item[(b)]
+    Define
+    \[
+    C_i = \left|\{p_{i,1},\ldots,p_{i,r}\}\setminus (T_1\cup\cdots\cup T_{i-1})\right|
+    \]
+    \[
+    a_i = \AREA\left(T_i\setminus (T_1\cup\cdots\cup T_{i-1})\right),
+    \]
+    we have,
+    \[
+    C_i \sim \operatorname{Bin}\left(r, \frac{a_i}{\AREA(T_i)}\right),
+    \]
+    which is the probability that a random point in \(T_i\) is not covered by previous triangles.
+    \[
+    \Var[C_i] = r\cdot p_i\cdot (1 - p_i).
+    \] Thus,
+    \[
+    \Var[X_i] = \left(\frac{\AREA(T_i)}{r}\right)^2 \cdot 
+    \Var[C_i] = \frac{\AREA(T_i)^2}{r^2} \cdot r p_i (1 - p_i) = \frac{a_i \text{area}(T_i)}{r} (1 - p_i).
+    \]
+    Since \(1 - p_i \le 1\), we have:
+    \[
+    \Var[X_i] \le \frac{a_i \AREA(T_i)}{r}.
+    \]
+    Since \(X_i\) are independent, the total variance is the sum of variances of \(X_i\):
+    \[
+    \Var[X] = \sum_{i=1}^n \Var[X_i] \le \sum_{i=1}^n \frac{a_i \AREA(T_i)}{r}.
+    \]
+    Notice \(\AREA(T_i) \le A\) for all \(i\) (since each triangle is part of the union). Thus,
+    \[
+    \sum_{i=1}^n a_i \AREA(T_i) \le \sum_{i=1}^n a_i A = A \sum_{i=1}^n a_i = A \cdot A = A^2.
+    \]
+    Substituting this bound:
+    \[
+    \Var[X] \le \frac{A^2}{r}.
+    \]
+
+    \item[(c)] 
+    For each triangle \( T_i \), generating \( r \) random points takes \( O(r) \) time.
+    For each point \( p_{i,j} \), checking membership in \( T_1 \cup \cdots \cup T_{i-1} \) 
+    requires \( O(i) \) operations (testing against \( i-1 \) triangles, each in \( O(1) \) time).  
+    Total time for all checks:  
+    \[
+    \sum_{i=1}^n r \cdot O(i) = O(rn^2).
+    \]
+    Combining sampling and checks:  
+    \[
+    O(nr) + O(rn^2) = O(rn^2).
+    \]
+    Choosing \( r \) as a constant gives \( O(n^2) \) time.
+
+    By Chebyshev's Inequality, for \( \epsilon = 0.01A \):  
+    \[
+    \Pr\left[|X - A| \geq 0.01A\right] \leq \frac{\Var[X]}{(0.01A)^2} \leq \frac{A^2/r}{0.0001A^2} = \frac{10000}{r}.
+    \]
+    To ensure \( \frac{10000}{r} \leq 0.01 \), set \( r \geq 10^6 \).
+\end{enumerate}
+
+
+\newpage
 \item[Problem 6.3:]
 We are given a (unweighted) bipartite graph $G$ with $n$ vertices and $m$ edges.  Suppose we have already computed a maximum matching $M$ in $G$.  Now suppose we delete
 a vertex $v$ from $G$ and all its incident edges.  Let $G'$
@@ -115,7 +333,43 @@ Describe how to efficiently compute a new maximum matching $M'$
 in $G'$.  (Your algorithm should be faster than re-running a matching
 algorithm from scratch.  Remember to prove correctness of your algorithm.)
 
+\textbf{Solution:}
 
+Idea: According to Berge's theorem, 
+if there is no augmenting path in the current bipartite graph, 
+then the current matching has already reached the maximum matching size.
+\begin{algorithm}
+\caption{}
+\begin{algorithmic}[1]
+\Require Bipartite graph \(G = (X \cup Y, E)\), a maximum matching \(M\) in \(G\), and a vertex \(v \in V(G)\) to delete.
+\Ensure A maximum matching \(M'\) in the new graph \(G' = G \setminus \{v\}\).
+\Procedure{UpdateMatching}{$G, M, v$}
+    \State Remove vertex \(v\) and all incident edges from \(G\) to form \(G'\)
+    \If{\(v\) is not matched in \(M\)}
+        \State \Return \(M\) \Comment{Matching remains valid}
+    \Else
+        \State \(u \gets\) the vertex matched with \(v\) in \(M\)
+        \State \(M' \gets M \setminus \{(u,v)\}\)
+        \State \(P \gets\) augmenting path of $(G', M')$ from $u$ using BFS/DFS
+        \If{\(P\) is found}
+            \State updating $M'$ by flipping the edges along the augmenting path $P$
+            \State \Return \(M'\)
+        \Else
+            \State \Return \(M'\) \Comment{Maximum matching decreases by one}
+        \EndIf
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Correctness and Complexity:
+
+If the deleted vertex \(v\) is unmatched, the matching \(M\) remains maximum in \(G'\). 
+
+If \(v\) is matched, removing it leaves vertex \(u\) unmatched. According to Berge's theorem, if an augmenting path is found starting from \(u\), flipping the edges restores the matching size; 
+otherwise, $M'$ has already reached the maximum matching size, which means the maximum matching size of \(G'\) decreases by one.
+
+The search for an augmenting path runs in \(O(n+m)\), which is faster than recomputing the matching from scratch.
 
 \end{description}
 \end{document}
