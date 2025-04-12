@@ -1,0 +1,101 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,graphicx,hyperref,amsmath,amssymb}
+
+\newcommand{\fig}[2]{\begin{figure}[h]\begin{center}%
+  \includegraphics[scale=#2]{#1.pdf}\end{center}%
+  \end{figure}}
+\newcommand{\ceil}[1]{\left\lceil #1\right\rceil}
+
+\begin{document}
+
+\begin{center}\Large\bf 
+CS 473 (Spring 2025)\\
+Homework 8 (due Apr 17 Thu 10am)
+\end{center}
+
+\medskip\noindent
+{\bf Instructions:} As in previous homeworks.
+
+\begin{description}
+
+\bigskip
+\item[Problem 8.1:]\
+
+\begin{enumerate}
+\item[(a)] (80 pts)
+Run the simplex method 
+on the following linear program:
+\[ \begin{array}{lrcl}
+\mbox{maximize} & x_1 + x_2 &&\\
+\mbox{s.t.} & 3x_1 + 2x_2 &\le& 27\\
+&x_2&\le&8\\
+& x_1+5x_2&\le&35\\
+& 2x_1 + x_2 &\le& 17\\
+&x_1,x_2&\ge& 0.
+\end{array}\]
+Start with the initial basic solution
+$(\overline{x}_1,\overline{x}_2)=(0,0)$, and
+{\em choose $x_1$ as the entering variable in the first iteration}.
+Show the new slack form after every iteration.
+\item[(b)] (20 pts)
+Write down the dual of the linear program from (a).
+What is the optimal dual solution?
+\end{enumerate}
+
+
+\bigskip
+\item[Problem 8.2:]
+\newcommand{\VEC}[1]{#1}%{\mathbf{#1}}
+\newcommand{\R}{\mathbb{R}}
+For two points $\VEC{p}=(p_1,\ldots,p_d)\in \R^d$ and 
+$\VEC{q}=(q_1,\ldots,q_d)\in \R^d$,
+their \emph{rectilinear distance} is defined as 
+$$D(\VEC{p},\VEC{q})=|p_1-q_1|+\cdots+|p_d-q_d|.$$
+In the {\em rectilinear 1-center} problem in $d$ dimensions,
+we are given a set $P$ of $n$ points in $\R^d$,
+we want to find a point $\VEC{q}\in \R^d$ (not necessarily in $P$)
+that minimizes $\max_{\VEC{p}\in P} D(\VEC{p},\VEC{q})$.
+
+\begin{enumerate}
+\item[(a)] (30 pts)
+First show that the problem can be solved in $O(n)$ time for
+any constant dimension $d$.  How does the running time of your
+algorithm grow as a function of $d$?
+
+(Hint: find a small number of candidate points in $P$ that could be the 
+farthest point from any $\VEC{q}$\ldots)
+\item[(b)] (70 pts)
+Show how to solve this problem for large (nonconstant) dimensions $d$ by
+using linear programming.
+The number of variables and constraints should be polynomial in $n$
+and~$d$.  (Remember to justify correctness of your reduction.)
+\end{enumerate}
+
+
+\bigskip
+\item[Problem 8.3:]
+We are given $n$ tasks to perform.  Task $i$ requires
+$p_i$ units of power consumption for a duration of $h_i$ hours.
+At any moment in time, we can perform at most 3 different tasks, 
+and at any moment in time, the total power consumption must be at most
+$P$.  A task may be preempted (possibly multiple times) at
+no extra cost.  The problem is to devise a schedule to
+perform all $n$ tasks with the minimum total number of hours.
+
+For example: for $n=5$ with $p_1=10$, $h_1=8.5$, $p_2=20$, $h_2=9$,
+$p_3=60$, $h_3=4$, $p_4=80$, $h_4=3.5$, $p_5=90$, $h_5=2$, and $P=100$,
+one feasible solution is to do tasks 1 and 5 for 2 hours,
+then tasks 2 and 4 for $3.5$ hours,
+then tasks 1, 2, and 3 for 4 hours,
+then tasks 1 and 2 for $1.5$ hours,
+and finally task 1 for 1 hour; the total number of hours is $12$.
+(I did not check if this is optimal.  Also, for this small
+example, the constraint that we can do at most 3 tasks at any time
+is not important; but it could make a difference on larger instances.)
+
+Describe how to solve this problem
+using linear programming.
+The number of variables and constraints should be polynomial in $n$.
+
+\end{description}
+\end{document}
