@@ -43,18 +43,132 @@ What is the optimal dual solution?
 \end{enumerate}
 
 
-\bigskip
+\newpage
+\textbf{Solution:}
+\begin{enumerate}
+  \item[(a)]
+\end{enumerate}
+\[
+\begin{array}{rcrcrcrcr|r}
+z & = & & & x_1 & + & x_2,\\\hline
+w_1 & = & 27 & - & 3x_1 & - & 2x_2, \\
+w_2 & = & 8 & & & - & x_2,\\
+w_3 & = & 35 & - & x_1 & - & 5x_2, & \\
+w_4 & = & 17 & - & 2x_1 & - & x_2, &\\
+\end{array}
+\]
+The initial solution is \((x_1,x_2,w_1,w_2,w_3,w_4)=(0,0,27,8,35,17)\).
+
+\textit{Iteration 1.} Choose \(x_1\), compute ratios:
+\[
+\frac{27}{3}=9,\quad
+\frac{35}{1}=35,\quad
+\frac{17}{2}=8.5,
+\]
+Minimum is 8.5, so \(w_4\) leaves.
+
+\[
+w_4 = 17 - 2x_1 - x_2
+\;\Longrightarrow\;
+x_1 = \frac{17}{2} - \frac{1}{2}w_4 - \frac{1}{2}x_2.
+\]
+Substitute into all other equations:
+
+\[
+\begin{array}{rcrcrcrcr|r}
+z & = & \frac{17}{2} & - & \frac{1}{2}w_4 & + & \frac{1}{2}x_2, \\\hline
+w_1 & = & \frac{3}{2} & + & \frac{3}{2}w_4 & - & \frac{1}{2}x_2, \\
+w_2 & = & 8 & & & - & x_2, \\
+w_3 & = & \frac{53}{2} & + & \frac{1}{2}w_4 & - & \frac{9}{2}x_2, \\
+x_1 & = & \frac{17}{2} & - & \frac{1}{2}w_4 & - & \frac{1}{2}x_2.
+\end{array}
+\]
+
+New solution is \((x_1,x_2,w_1,w_2,w_3,w_4)=(\frac{17}{2},0,\frac{3}{2},8,\frac{53}{2},\frac{17}{2})\).
+
+\textit{Iteration 2.} Choose \(x_2\), compute ratios:
+\[
+\frac{3/2}{1/2}=3,\quad
+\frac{8}{1}=8,\quad
+\frac{53/2}{9/2}=\frac{53}{9},\quad
+\frac{17/2}{1/2}=17,
+\]
+Minimum is 3, so \(w_1\) leaves.
+
+\[
+w_1 = \frac{3}{2} + \frac{3}{2}w_4 - \frac{1}{2}x_2
+\;\Longrightarrow\;
+x_2 = 3 + 3w_4 - 2w_1.
+\]
+Substitute into all other equations:
+
+\[
+\begin{array}{rcrcrcrcr|r}
+z & = & 10 & + & w_4 & - & w_1, \\\hline
+x_2 & = & 3 & + & 3w_4 & - & 2w_1, \\
+w_2 & = & 5 & - & 3w_4 & + & 2w_1, \\
+w_3 & = & 13 & - & 13w_4 & + & 9w_1, \\
+x_1 & = & 7 & - & 2w_4 & + & w_1.
+\end{array}
+\]
+
+New solution is \((x_1,x_2,w_1,w_2,w_3,w_4)=(7,3,0,5,13,0)\).
+
+\textit{Iteration 3.} Choose \(w_4\), compute ratios:
+\[
+\frac{5}{3},\quad
+\frac{13}{13}=1,\quad
+\frac{7}{2},
+\]
+Minimum is 1, so \(w_3\) leaves.
+
+\[
+w_3 = 13 - 13w_4 + 9w_1
+\;\Longrightarrow\;
+w_4 = 1 - \frac{1}{13}w_3 + \frac{9}{13}w_1
+\]
+Substitute into all other equations:
+
+\[
+\begin{array}{rcrcrcrcr|r}
+z & = & 11 & - & \frac{1}{13}w_3 & - & \frac{4}{13}w_1, \\\hline
+x_2 & = & 6 & + & \frac{3}{13}w_3 & + & \frac{1}{13}w_1, \\
+w_2 & = & 2 & + & \frac{3}{13}w_3 & - & \frac{1}{13}w_1, \\
+w_4 & = & 1 & - & \frac{1}{13}w_3 & + & \frac{9}{13}w_1, \\
+x_1 & = & 5 & + & \frac{2}{13}w_4 & - & \frac{5}{13}w_1.
+\end{array}
+\]
+
+Thus, we obtain the optimal solution \((x_1^*, x_2^*) = (5, 6)\), \(z^* = 11\). 
+
+\item[(b)]
+
+Introduce dual variables \(y_1,y_2,y_3,y_4\ge0\) for the four constraints.  The dual is
+
+\[
+\begin{array}{rrr}
+\min\;&27y_1 +8y_2 +35y_3 +17y_4,&\\
+\text{s.t.}\;&3y_1 + 0y_2 + y_3 +2y_4 &\ge1,\\
+&2y_1 +1y_2 +5y_3 + 1y_4 &\ge1,\\
+&y_1, y_2, y_3, y_4 &\ge0.
+\end{array}
+\]
+
+From part (a), we have optimal solution \((x_1^*, x_2^*) = (5, 6)\) and \(z^* = 11\).
+Thus, \(27y_1 +8y_2 +35y_3 +17y_4 \ge x_1^* + x_2^* = 10\).
+Using the same method in part (a), we obtain the optimal dual solution
+\((y_1^*, y_2^*, y_3^*, y_4^*) = (\frac{28}{91}, 0, \frac{7}{91}, 0)\).
+
+\newpage
 \item[Problem 8.2:]
-\newcommand{\VEC}[1]{#1}%{\mathbf{#1}}
-\newcommand{\R}{\mathbb{R}}
-For two points $\VEC{p}=(p_1,\ldots,p_d)\in \R^d$ and 
-$\VEC{q}=(q_1,\ldots,q_d)\in \R^d$,
+For two points $\mathbf{p}=(p_1,\ldots,p_d)\in \mathbb{R}^d$ and 
+$\mathbf{q}=(q_1,\ldots,q_d)\in \mathbb{R}^d$,
 their \emph{rectilinear distance} is defined as 
-$$D(\VEC{p},\VEC{q})=|p_1-q_1|+\cdots+|p_d-q_d|.$$
+$$D(\mathbf{p},\mathbf{q})=|p_1-q_1|+\cdots+|p_d-q_d|.$$
 In the {\em rectilinear 1-center} problem in $d$ dimensions,
-we are given a set $P$ of $n$ points in $\R^d$,
-we want to find a point $\VEC{q}\in \R^d$ (not necessarily in $P$)
-that minimizes $\max_{\VEC{p}\in P} D(\VEC{p},\VEC{q})$.
+we are given a set $P$ of $n$ points in $\mathbb{R}^d$,
+we want to find a point $\mathbf{q}\in \mathbb{R}^d$ (not necessarily in $P$)
+that minimizes $\max_{\mathbf{p}\in P} D(\mathbf{p},\mathbf{q})$.
 
 \begin{enumerate}
 \item[(a)] (30 pts)
@@ -63,7 +177,7 @@ any constant dimension $d$.  How does the running time of your
 algorithm grow as a function of $d$?
 
 (Hint: find a small number of candidate points in $P$ that could be the 
-farthest point from any $\VEC{q}$\ldots)
+farthest point from any $\mathbf{q}$\ldots)
 \item[(b)] (70 pts)
 Show how to solve this problem for large (nonconstant) dimensions $d$ by
 using linear programming.
@@ -71,8 +185,100 @@ The number of variables and constraints should be polynomial in $n$
 and~$d$.  (Remember to justify correctness of your reduction.)
 \end{enumerate}
 
+\newpage
+\textbf{Solution:}
+\begin{enumerate}
+  \item[(a)]
+  Define direction vector $s=(s_1,\dots,s_d)\in\{+1,-1\}^d$, and projection
+  \[
+  f_s(p)=\sum_{i=1}^{d}p_i s_i
+  \]
+  An observation is that for any direction vector we have:
+  \[
+  \sum_{i=1}^d |p_i - q_i| = \max_{s\in \{-1,1\}^d} \sum_{i=1}^d s_i (p_i - q_i)
+  \]
+  because for each $i$ one can choose $s_i$ to be $+1$ or $-1$ so that $s_i(p_i - q_i)=|p_i-q_i|$. Thus,
+  \[
+  D(p, q) = \max_{s\in \{-1,1\}^d} (f_s(p) - f_s(q)).
+  \]
 
-\bigskip
+  For each of the $2^d$ choices of $s\in\{+1,-1\}^d$ we scan once through all $n$ points and find candidate points that could be the farthest from $q$:
+  \[
+  M_s \;=\;\max_{p\in P}f_s(p),
+  \qquad
+  m_s \;=\;\min_{p\in P}f_s(p).
+  \]
+  Once we know $M_s$ and $m_s$, the best choice of $f_s(q)$ is to place
+  \[
+  f_s(q)=\frac{M_s + m_s}{2}.
+  \]
+  Each such scan takes $O(nd)$ time (to form each dot product $f_s(p)$ in $O(d)$ and take a max/min), so over all $s$ this is
+  \[
+  O\bigl(2^d\cdot n\cdot d\bigr).
+  \]
+  Therefore, the running time grows exponentially with $d$. 
+  For any constant dimension $d$, the problem can be solved in $O(n)$ time.
+
+  \item[(b)]
+  \textbf{Construct LP:}
+
+  For each input point \(p^{(j)}=(p^{(j)}_1,\dots,p^{(j)}_d)\), 
+  and for each coordinate \(i\in\{1,\dots,d\}\), introduce a variable \(t_{j,i}\ge0\)
+  that will represent \(\bigl|\,q_i - p^{(j)}_i\bigr|\).
+
+  Introduce a single variable \(r\ge0\) to represent the maximum rectilinear distance \\
+  \(\max_j D(p^{(j)},q)\).
+
+  In total, there are $O(nd)$ variables.
+
+  For each point \(j\in\{1,\dots,n\}\) and each coordinate \(i\in\{1,\dots,d\}\), enforce
+  \[
+    \begin{cases}
+      q_i - p^{(j)}_i \;\le\; t_{j,i},\\
+      p^{(j)}_i - q_i \;\le\; t_{j,i}.
+    \end{cases}
+  \]
+  These two inequalities together force 
+  \(\;t_{j,i} \ge |\,q_i - p^{(j)}_i|\).  
+
+  For each point \(j\), its rectilinear distance to \(q\) is
+  \(\sum_{i=1}^d |\,q_i - p^{(j)}_i|\).  We enforce
+  \[
+    \sum_{i=1}^d t_{j,i}
+    \;\le\; r.
+  \]
+  This guarantees that \(r\) is at least as large as every \(D(p^{(j)},q)\).
+
+  That is \(2nd\) constraints from the absolute-value linearization, 
+  plus \(n\) constraints from the sum $\le r$ requirements, 
+  for a total of $O(nd)$ constraints.
+
+  The objective of this LP is to minimize $r$.
+  
+  \textbf{Proof of correctness:}
+
+  \((\Longrightarrow)\) center with radius \(r\):
+
+  Any choice of \(q\) and \(r\) that satisfies the LP constraints 
+  (i.e., the rectilinear 1-center) must have  
+  \(\sum_i t_{j,i}\le r\) for each \(j\), and each \(t_{j,i}\ge |q_i - p^{(j)}_i|\).  Hence  
+  \(\sum_i |q_i - p^{(j)}_i| \le \sum_i t_{j,i} \le r\), i.e.\ \(D(p^{(j)},q)\le r\) for all \(j\).  
+  Conversely, any \(q\) with \(\max_j D(p^{(j)},q)\le r\) gives a feasible LP solution by setting \(t_{j,i}=|q_i-p^{(j)}_i|\).
+
+  \((\Longleftarrow)\) minimal max-distance:
+
+  Since the LP minimizes \(r\), the optimum LP value \(r^*\) is the smallest radius for which a center \(q\) exists that keeps all points within distance \(r^*\).  That is exactly the rectilinear 1-center objective.
+  
+  \textbf{Time complexity:}
+
+  There are \(O(nd)\) variables and \(O(nd)\) constraints, 
+  hence we can solve the LP problem in \(\mathrm{poly}(n,d)\) time.
+
+\end{enumerate}
+
+
+
+\newpage
 \item[Problem 8.3:]
 We are given $n$ tasks to perform.  Task $i$ requires
 $p_i$ units of power consumption for a duration of $h_i$ hours.
@@ -96,6 +302,62 @@ is not important; but it could make a difference on larger instances.)
 Describe how to solve this problem
 using linear programming.
 The number of variables and constraints should be polynomial in $n$.
+
+\newpage
+\textbf{Solution:}
+
+Let  
+\[
+  \mathcal{S} \;=\;
+  \Bigl\{\,S\subseteq\{1,\dots,n\}:
+    1\le |S|\le3,\;\sum_{i\in S}p_i\le P
+  \Bigr\}
+\]
+be the set of all possible combinations of tasks of size at most 3 whose total power draw is at most \(P\). \(|\mathcal{S}|=O(n^3)\).
+
+For each combination \(S\in\mathcal{S}\), introduce a variable $x_S$ representing the total number of running hours of \(S\).
+
+Task \(i\) must be run for a total of \(h_i\) hours (can be split across many states).  Whenever we are in state \(S\) and \(i\in S\), we accrue work toward task \(i\). Hence we enforce
+\[
+  \sum_{\substack{S\in\mathcal{S}\\i\in S}} x_S = 
+  h_i, \quad i=1,\dots,n.
+\]
+\[
+  x_S \;\ge\; 0,
+  \quad
+  \forall S\in\mathcal{S}.
+\]
+
+Minimize the total time used:
+\[
+  \min\;\sum_{S\in\mathcal{S}} x_S.
+\]
+
+Putting it together, we obtain the LP problem:
+
+\[
+\begin{aligned}
+  \text{Minimize}\quad
+    & \sum_{S\in\mathcal{S}} x_S
+  \\
+  \text{s.t.}\quad
+    & \sum_{\substack{S\in\mathcal{S}\\i\in S}} x_S \;=\; h_i,
+      && i=1,\dots,n, 
+  \\
+    & x_S \;\ge\; 0,
+      && \forall\,S\in\mathcal{S}.
+\end{aligned}
+\]
+
+Algorithm:
+\begin{enumerate}
+\item Construct and solve the LP to get optimal values \(\{x_S^*\}_{S\in\mathcal S}\).  
+\item List all states \(S\) with \(x_S^*>0\).  
+\item Build the schedule by concatenating, in any order, one time block of length \(x_S^*\) during which we run the tasks in \(S\). Because tasks are fully preemptible, we can schedule these blocks arbitrarily.
+\end{enumerate}
+
+The resulting schedule has total duration \(\sum_S x_S^*\), meets the "\(\le3\) tasks" and "\(\le P\) power" limits by the construction above, and gives each task \(i\) exactly \(\sum_{S\ni i} x_S^*=h_i\) hours of run-time.
+There are \(\,|\mathcal{S}|=O(n^3)\) variables and \(O(n)\) constraints, both are polynomial in \(n\).
 
 \end{description}
 \end{document}
