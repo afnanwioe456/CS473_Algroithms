@@ -1,0 +1,85 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,amssymb,graphicx,hyperref,xcolor,algorithm,algpseudocodex,amsmath}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{2ex}
+
+\begin{document}
+\begin{minipage}[t]{0.5\textwidth}
+\Large
+CS 473 (Spring 2025)\\
+\bf Problem 9.3
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.5\textwidth}
+\begin{flushright}
+\Large
+Yiming Qin (yimingq3@illinois.edu)\\
+\end{flushright}
+\end{minipage}
+
+\hrulefill
+
+
+\textbf{Solution:}
+
+\textbf{Definition}
+
+A \emph{perfect loop} is a set of three disjoint circular intervals on the real line that join end-to-end in a cycle.
+\[
+  [k+1,\,\infty) \cup (-\infty,\,i],\;[i+1,\,j],\;[j+1,\,k], \quad i,j,k\in \mathbb{R^+}
+\]
+We will show a bijection between directed triangles in the graph and such perfect loops in the interval instance.
+
+\textbf{Interval Construction}
+
+Let $M = n + 1$.  For each directed edge $(i \to j) \in E$, construct three circular intervals:
+\begin{align*}
+  I_{ij}^{(1)} &= [i,\; M + j - 1], \\
+  I_{ij}^{(2)} &= [M + i,\; 2M + j - 1], \\
+  I_{ij}^{(3)} &= [2M + i,\; \infty) \cup (-\infty,\; j - 1].
+\end{align*}
+By construction, for any triangle $(i \to j \to k \to i)$, the three intervals
+\[
+  I_{ij}^{(1)},\quad I_{jk}^{(2)},\quad I_{ki}^{(3)}
+\]
+are exactly a perfect loop as defined above. (Similarly for $I_{ij}^{(2)},I_{jk}^{(3)},I_{ki}^{(1)}$ and $I_{ij}^{(3)},I_{jk}^{(1)},I_{ki}^{(2)}$.)
+
+Since \( M > n \), any two intervals of the same type (i.e., both of the form \( I^{(1)} \), \( I^{(2)} \), or \( I^{(3)} \)) will necessarily overlap. Therefore, any disjoint subset of intervals can contain at most one interval of each type, implying that the maximum size of a disjoint subset is 3, and any such subset of size 3 must consist of exactly one interval of each type.
+
+\textbf{Weight Assignment}
+
+Let $W=3\cdot \max_{(i\to j)\in E}w_{ij}$. Assign
+\[
+  W_{ij}^{*} = (M + j - i)W - w_{ij}.
+\]
+Since $w_{ij} > 0$ and $M = n + 1$, we have $W_{ij}^* > 0$.
+
+For any disjoint set of size 3, its total weight is
+\[
+  (3M + v' - v + u' - u + w' - w)W - (w_{vv'} + w_{uu'} + w_{ww'}),
+\]
+where
+\[
+  w' < v < v' < u < u' < w, \quad u, u', v, v', w, w' \in R^+.
+\]
+Note that $v' - v + u' - u + w' - w \le 0, W > (w_{vv'} + w_{uu'} + w_{ww'})$. From this, we can conclude that for any set of three disjoint circular intervals the total weight is always at most \(3MW\). 
+
+For a perfect loop, since it corresponds to a triangle, we have $v'=u, u'=w, w'=v$ thus $v' - v + u' - u + w' - w =0$, its total weight is at least \((3M-1)W\). 
+Meanwhile, for any set of three disjoint intervals that does not form a perfect loop, we have $v' - v + u' - u + w' - w < 0$, its total weight strictly less than \((3M-1)W\).
+
+\textbf{Correctness of the Reduction}
+
+\paragraph{$(\Rightarrow)$}
+If $(i \to j \to k \to i)$ is a directed triangle, then selecting $I_{ij}^{(1)},I_{jk}^{(2)},I_{ki}^{(3)}$ yields three disjoint intervals forming a perfect loop. Their total weight is
+\[
+  3MW - (w_{ij} + w_{jk} + w_{ki}).
+\]
+where $(w_{ij} + w_{jk} + w_{ki})$ is the weight of the triangle. Since any set of three disjoint intervals that does not form a perfect loop must have samller weight, the \textsc{min-weight-triangle} corresponds to the max-weight \textsc{circular-interval-selection}.
+
+\paragraph{$(\Leftarrow)$}
+Conversely, any set of three disjoint intervals that does not form a perfect circular loop will either contain overlapping intervals (and thus be invalid) or have a total weight strictly less than that of any perfect loop. Therefore, the disjoint subset with maximum total weight must consist of exactly three intervals that form a perfect circular loop. By the interval construction, such a perfect loop corresponds precisely to a directed triangle \((u \to v \to w \to u)\) in the graph \(G\).
+
+\textbf{Complexity}
+
+This reduction runs in $O(|E|)$ time and produces $N=3|E|=O(n^2)$ intervals.  An $O(N^{1.499})$ algorithm for {\sc Circular-Interval-Selection} would yield an $O(n^{2.999})$ algorithm for {\sc Min-Weight-Triangle}, contradicting the conjectured hardness.
+\end{document}

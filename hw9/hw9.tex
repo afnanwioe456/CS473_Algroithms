@@ -35,7 +35,69 @@ of an input to {\sc Colorful-Path} from any given input to {\sc 3-SAT} (a 3CNF f
 
 (Hint: for your construction of the dag $G$, try something like the picture below\ldots\ \ Describe how to assign colors to the edges along these paths.)
 
+\newpage
+\textbf{Solution:}
 
+\textbf{Reduction from 3-SAT}
+
+Given a 3CNF formula with $n$ variables $x_1, \dots, x_n$ and $m$ clauses $C_1, \dots, C_m$, where each clause $C_j$ contains exactly three literals.
+
+Construct a DAG $G = (V, E)$, a coloring function $c: E \to \{1, \dots, m\}$, and vertices $s$ and $t$ such that the formula is satisfiable iff there exists a path from $s$ to $t$ in $G$ that encounters at least $\ell = m$ distinct colors.
+
+\textbf{DAG Construction}
+
+\begin{itemize}
+  \item For each variable $x_i$, construct a gadget consisting of two paths from a vertex $u_i$ to $v_i$: 
+    \begin{itemize}
+      \item The upper path $P_i^T$ corresponds to assigning $x_i = \text{true}$.
+      \item The lower path $P_i^F$ corresponds to assigning $x_i = \text{false}$.
+    \end{itemize}
+    These paths form a ``diamond'' structure.
+    \begin{figure}[htbp]
+      \centering
+      \includegraphics[width=0.25\textwidth]{hw9fig1_gadget.jpg}
+      \caption{gadget}
+    \end{figure}
+  \item Each clause $C_j$ is assigned a unique color $j \in \{1, \dots, m\}$.
+  \item For each occurrence of literal $x_i$ in clause $C_j$, insert an edge labeled with color $j$ on the upper path $P_i^T$.
+  \item For each occurrence of literal $\neg x_i$ in clause $C_j$, insert an edge labeled with color $j$ on the lower path $P_i^F$.
+  \item Connect the gadgets in sequence:
+    \[
+      u_1 \rightarrow v_1 \rightarrow u_2 \rightarrow v_2 \rightarrow \dots \rightarrow u_n \rightarrow v_n.
+    \]
+    Merge $v_i$ and $u_{i+1}$ ($i = 1, 2, \cdots, n-1$) into a singal node $u_{i+1}$ (no colored path between them).
+    
+    Let the source vertex $s \leftarrow u_1$ and the sink vertex $t \leftarrow v_n$.
+
+    Thus we have the DAG:
+    \[
+      s \rightarrow u_2 \rightarrow \dots \rightarrow u_n \rightarrow t.
+    \]
+    each $\rightarrow$ represents a gadget.
+
+\end{itemize}
+
+\textbf{Correctness of the Reduction}
+
+\paragraph{($\Rightarrow$)} Suppose the 3CNF formula is satisfiable. Then there exists a truth assignment such that every clause $C_j$ is satisfied. Construct an $s$-$t$ path in $G$ as follows:
+\begin{itemize}
+  \item For each variable $x_i$, if $x_i = \text{true}$, follow the upper path $P_i^T$; otherwise, follow $P_i^F$.
+\end{itemize}
+Because the assignment satisfies all clauses, for each clause $C_j$, at least one literal in $C_j$ is true under the assignment. Therefore, the corresponding path will include an edge colored with $j$. Hence, the path encounters all $m$ colors.
+
+\paragraph{($\Leftarrow$)} Suppose there is an $s$–$t$ path in $G$ that encounters at least $m$ distinct colors. Because each gadget has only two disjoint paths, and the entire graph is a sequence of such gadgets, the path must make exactly one choice (true/false) per variable. Define the truth assignment accordingly:
+\begin{itemize}
+  \item If the path takes $P_i^T$, assign $x_i = \text{true}$.
+  \item If the path takes $P_i^F$, assign $x_i = \text{false}$.
+\end{itemize}
+Since the path encounters all $m$ colors, each clause color must appear on the path. Therefore, for each clause $C_j$, at least one of its literals is satisfied under this assignment. Thus, the 3CNF formula is satisfiable.
+
+\textbf{Complexity}
+
+The number of vertices and edges in $G$ is $O(nm)$. The \textsc{Colorful-Path} problem is in NP, as the reduction can be done in polynomial time and a path can be verified in polynomial time.
+
+
+\newpage
 \item[Problem 9.2:]
 Consider the following problem {\sc Covering-Square-by-Triangles}:
 \begin{quote}
@@ -53,8 +115,99 @@ As always, describe the construction of your reduction precisely, and carefully 
 
 (Hint: map each edge of the input graph to a tiny interval along the boundary of $s$\ldots)
 
+\newpage
+\textbf{Solution:}
 
-\bigskip
+\textit{Lemma.} Let \(s\) be a square in the plane, and on three distinct sides of \(s\) choose three disjoint open segments, \textbf{none of which touches a corner of \(s\)}. Then there exists a  triangle whose edges \textbf{exactly} coincide with those three given segments.
+
+\textit{Proof.} On Side \(i\) let the open segment be \([u_i,v_i]\), oriented so that as we traverse the boundary of \(s\) in clockwise order we meet \(u_i\) before \(v_i\). Since all three segments have the same length and lie on distinct sides, the six points
+\[
+u_1,\;v_1,\;u_2,\;v_2,\;u_3,\;v_3
+\]
+appear in convex position along the boundary of \(s\).
+
+Consider the three lines
+\[
+\ell_1 = \overline{v_1u_2},\quad
+\ell_2 = \overline{v_2u_3},\quad
+\ell_3 = \overline{v_3u_1}.
+\]
+We claim that no two of these lines are parallel. 
+
+Suppose, for sake of contradiction, that \(\ell_i\) and \(\ell_j\) were parallel.  Because each segment \([u_k,v_k]\) lies on a different side of the square, the only way, say, \(\overline{v_1u_2}\parallel\overline{v_2u_3}\) can occur is if those lines both lie in directions parallel to one pair of opposite sides of the square. But then the third line \(\ell_3=\overline{v_3u_1}\) must connect points on the remaining pair of opposite sides, and so \(\ell_3\) would pass through a corner of the square. This contradicts the segment construction.
+
+Hence \(\ell_1,\ell_2,\ell_3\) are pairwise non-parallel, and so they form the three sides of a triangle \(T\).
+
+\textbf{Reduction Construction}
+
+\textit{Idea:} We reduce from \textsc{Vertex-Cover} on graphs with maximum degree 3. Given a graph $G=(V,E)$ with $\Delta(G)\leq3$ and an integer $K$, we construct an instance of \textsc{Covering-Square-by-Triangles}.
+
+\begin{enumerate}
+  \item[1.]
+  Since $\Delta(G)\leq 3$, the graph is 4-edge-colorable.
+  Compute in polynomial time a proper 4-edge-coloring
+    \[
+      c(e) = j, \; j \in \{1, 2, 3, 4\}, \; e \in E.
+    \]
+  Let
+    \[
+      k \;=\;\max_{j\in\{1,2,3,4\}}\;|\{c(e) = j\}|, \; e \in E.
+    \]
+
+  \item[2.]
+  Label the four sides of a square \(s\) by \(1,2,3,4\).  On side \(j\) partition its interior into \(k+2\) equal open segments
+  \[
+    S_{j,1},\,S_{j,2},\dots,S_{j,k+2}\,.
+  \]
+  Since each color class has at most \(k\) edges, we can assign each edge \(e\in E\) of color \(j\) to a distinct segment \(S_{j,i}\).  The remaining two segments covering vertices of the square stay unused.
+
+  \item[3.]
+  For each vertex \(v\in V\) with incident edges \(e_1,\dots,e_d\) (\(d\le3\)). By the lemma, there is a unique triangle \(T_v\) whose edges exactly cover \({S_{c(e_d),i}} (d\le3, i\in \{1, 2, \cdots, k+2\})\). (If \(d<3\), the triangle is easier to construct by adding some dummy vertices near the center of the square.)
+  
+  Collect all such \(\{T_v : v\in V\}\).
+
+  \item[4.]
+  Any segment \(S_{j,i}\) not used by an edge gets its own ``fill-in'' triangle that exactly covers that single segment.  Call the set of all these triangles \(F\).
+  
+  Let
+  \[
+    T \;=\;\{\,T_v : v\in V\}\;\cup\;F,
+    \qquad
+    W \;=\; K + |F|.
+  \]
+\end{enumerate}
+
+\textbf{Correctness of the Reduction}
+
+\paragraph{($\Rightarrow$)} 
+If $G$ has a vertex cover of size $K$:
+
+Let $V' \subseteq V$ be a vertex cover of size $K$. Then select triangles
+\[
+Q = \{T_v : v \in V'\} \cup F,
+\]
+which has total size $K + |F| = W$.
+
+For every edge $e = (u,v)$, at least one of $u$ or $v$ is in $V'$, so the corresponding $\delta_e$ is covered by the triangle $T_u$ or $T_v$. All remaining parts of the square boundary are covered by triangles in $F$, so $Q$ covers the entire boundary.
+
+\paragraph{($\Leftarrow$)}
+If $Q \subseteq T$ of size $k$ covers the square boundary:
+
+Since the fill-in triangles in $F$ are the only ones that cover the leftover segments, all of $F$ must be included in $Q$.
+
+Thus, $Q \setminus F$ has size at most $K$ and must consist of triangles from $T_V$. Let $V' = \{v \in V : T_v \in Q\}$. By the Lemma, each edge is exactly covered by some triangles, and for every edge $e \in E$, the segment $\Delta_e$ must be covered, so some $T_v$ of $v$ incident to $e$ must be in $Q$. Therefore, $V'$ is a vertex cover.
+
+\textbf{Complexity}
+
+Note that the size of the constructed instance is polynomial in the size of the original graph. Each edge maps to a small interval on the square boundary, and each vertex yields at most one triangle. The number of fill-in triangles is smaller than $|E|$, since they only cover the leftover segments between $\delta_e$. Hence, the total number of triangles in $T$ is $|V| + O(|E|)$, and all geometric constructions (edge coloring, triangle placement) can be done in polynomial time. Therefore, the reduction is polynomial-time and \textsc{ Covering-Square-by-Triangles} is NP-hard.
+
+
+
+
+
+
+
+\newpage
 \item[Problem 9.3:]
 As we all know, an \emph{interval} is a set $[a,b]$ containing all real numbers between $a$ and $b$.
 Define a \emph{circular interval} to be either an interval $[a,b]$ (if $a\le b$),
@@ -87,5 +240,70 @@ in $O(N^{1.499})$ time.
 
 (Hint: map each edge $(v_i,v_j)$ of the input graph to three circular intervals $[i,M+j-1]$, $[M+i,2M+j-1]$, and $[2M+i,\infty)\cup (-\infty,j-1]$ for some $M$.  But how to assign weights to these circular intervals?)
 
+\newpage
+\textbf{Solution:}
+
+\textbf{Definition}
+
+A \emph{perfect loop} is a set of three disjoint circular intervals on the real line that join end-to-end in a cycle.
+\[
+  [k+1,\,\infty) \cup (-\infty,\,i],\;[i+1,\,j],\;[j+1,\,k], \quad i,j,k\in \mathbb{R^+}
+\]
+We will show a bijection between directed triangles in the graph and such perfect loops in the interval instance.
+
+\textbf{Interval Construction}
+
+Let $M = n + 1$.  For each directed edge $(i \to j) \in E$, construct three circular intervals:
+\begin{align*}
+  I_{ij}^{(1)} &= [i,\; M + j - 1], \\
+  I_{ij}^{(2)} &= [M + i,\; 2M + j - 1], \\
+  I_{ij}^{(3)} &= [2M + i,\; \infty) \cup (-\infty,\; j - 1].
+\end{align*}
+By construction, for any triangle $(i \to j \to k \to i)$, the three intervals
+\[
+  I_{ij}^{(1)},\quad I_{jk}^{(2)},\quad I_{ki}^{(3)}
+\]
+are exactly a perfect loop as defined above. (Similarly for $I_{ij}^{(2)},I_{jk}^{(3)},I_{ki}^{(1)}$ and $I_{ij}^{(3)},I_{jk}^{(1)},I_{ki}^{(2)}$.)
+
+Since \( M > n \), any two intervals of the same type (i.e., both of the form \( I^{(1)} \), \( I^{(2)} \), or \( I^{(3)} \)) will necessarily overlap. Therefore, any disjoint subset of intervals can contain at most one interval of each type, implying that the maximum size of a disjoint subset is 3, and any such subset of size 3 must consist of exactly one interval of each type.
+
+\textbf{Weight Assignment}
+
+Let $W=3\cdot \max_{(i\to j)\in E}w_{ij}$. Assign
+\[
+  W_{ij}^{*} = (M + j - i)W - w_{ij}.
+\]
+Since $w_{ij} > 0$ and $M = n + 1$, we have $W_{ij}^* > 0$.
+
+For any disjoint set of size 3, its total weight is
+\[
+  (3M + v' - v + u' - u + w' - w)W - \text{ some weights},
+\]
+where
+\[
+  w' < v < v' < u < u' < w, \quad u, u', v, v', w, w' \in R^+.
+\]
+Notice that $v' - v + u' - u + w' - w \le 0$. From this, we can conclude that for any set of three disjoint circular intervals the total weight is always at most \(3MW\). 
+
+For a perfect loop, since it corresponds to a triangle, we have $v' - v + u' - u + w' - w =0$, its total weight is at least \((3M-1)W\). 
+Meanwhile, for any set of three disjoint intervals that does not form a perfect loop, we have $v' - v + u' - u + w' - w < 0$, its total weight strictly less than \((3M-1)W\).
+
+\textbf{Correctness of the Reduction}
+
+\paragraph{$(\Rightarrow)$}
+If $(i \to j \to k \to i)$ is a directed triangle, then selecting $I_{ij}^{(1)},I_{jk}^{(2)},I_{ki}^{(3)}$ yields three disjoint intervals forming a perfect loop. Their total weight is
+\[
+  3MW - (w_{ij} + w_{jk} + w_{ki}).
+\]
+where $(w_{ij} + w_{jk} + w_{ki})$ is the weight of the triangle. Since any set of three disjoint intervals that does not form a perfect loop must have samller weight, the \textsc{min-weight-triangle} corresponds to the max-weight \textsc{circular-interval-selection}.
+
+\paragraph{$(\Leftarrow)$}
+Conversely, any set of three disjoint intervals that does not form a perfect circular loop will either contain overlapping intervals (and thus be invalid) or have a total weight strictly less than that of any perfect loop. Therefore, the disjoint subset with maximum total weight must consist of exactly three intervals that form a perfect circular loop. By the interval construction, such a perfect loop corresponds precisely to a directed triangle \((u \to v \to w \to u)\) in the graph \(G\).
+
+\textbf{Complexity}
+
+This reduction runs in $O(|E|)$ time and produces $N=3|E|=O(n^2)$ intervals.  An $O(N^{1.499})$ algorithm for {\sc Circular-Interval-Selection} would yield an $O(n^{2.999})$ algorithm for {\sc Min-Weight-Triangle}, contradicting the conjectured hardness.
+
 \end{description}
+
 \end{document}
