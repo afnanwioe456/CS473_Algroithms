@@ -51,8 +51,71 @@ has approximation factor at most 3.
 $a_{k_m}+a_{k_m+1}+\cdots+a_{k_{m+1}} > h_{k_{m+1}}$.
 Then sum both sides\ldots]
 
+\newpage
+\textbf{Solution:}
+\paragraph{Polynomial running time.}
+Sorting the $n$ rectangles by non‐increasing height takes $O(n\log n)$ time.  
+Then the single pass that scans through the list, forming each shelf by accumulating widths until they exceed 1, clearly takes $O(n)$ time.  Hence the overall running time is $O(n\log n)$.
 
-\bigskip
+\paragraph{Approximation ratio.}
+Let $H_G$ be the total height of the packing produced by the greedy algorithm, and let $H^*$ be the height of an optimal packing.
+
+Label the shelves produced by the algorithm $m=1,2,\dots,M$, and for each $m$ let $k_{m+1}$ be the index of the first rectangle not placed on shelf $m$, so by construction 
+\[
+w_{k_m}+w_{k_m+1}+\cdots+w_{k_{m+1}-1} \le 1
+\quad\text{but}\quad
+w_{k_m}+w_{k_m+1}+\cdots+w_{k_{m+1}} > 1.
+\]
+Each shelf $m$ is given height $h_{k_m}$, so
+\[
+H_G  = \sum_{m=1}^M h_{k_m}\,.
+\]
+For each shelf $m$,
+\[
+\sum_{i=k_m}^{k_{m+1}} a_i
+= \sum_{i=k_m}^{k_{m+1}} h_i\,w_i
+\ge h_{k_{m+1}} \bigl(w_{k_m}+ \cdots + w_{k_{m+1}}\bigr)
+> h_{k_{m+1}}.
+\]
+Summing this strict inequality over $m=1,2,\dots,M$ gives
+\[
+\sum_{m=1}^M \sum_{i=k_m}^{k_{m+1}} a_i
+> \sum_{m=1}^M h_{k_{m+1}}
+= \sum_{m=2}^{M+1}h_{k_m}
+= \sum_{m=2}^M h_{k_m}.
+\]
+(Since $k_{M+1}=n+1$ and we may set $h_{n+1}=0$.) The left-hand side is
+\[
+\sum_{m=1}^M \sum_{i=k_m}^{k_{m+1}} a_i 
+= \sum_{m=1}^M \left(\sum_{i=k_m}^{k_{m+1}-1} a_i + a_{k_{m+1}}\right)
+= A + \sum_{m=1}^M a_{k_{m+1}}
+< 2A
+\]
+and in any packing into a width-1 strip of height $H^*$ the total area satisfies $A\le H^*$.  Hence
+\[
+\sum_{m=2}^M h_{k_m}
+< 2A \le 2H^*.
+\]
+Therefore
+\[
+H_G
+= \sum_{m=1}^M h_{k_m}
+= h_{k_1} + \sum_{m=2}^M h_{k_m}
+< h_{k_1}  +  2H^*.
+\]
+Finally, since the tallest rectangle has height $h_{k_1}$ and must fit into any feasible packing, we have
+\[
+h_{k_1} \le H^*,
+\]
+and thus
+\[
+H_G  
+< h_{k_1}+H^*
+\le 3 H^*.
+\]
+The approximation factor is at most 3.
+
+\newpage
 \item[Problem 10.2:]
 Consider the following variant of the traveling salesman problem: given a complete
 weighted graph $G=(V,E)$, where the weights satisfy $d(u,v)=d(v,u)$
@@ -104,10 +167,81 @@ and see; then use induction to prove your observations formally.]
 approximation factor at most 3.  
 \end{enumerate}
 
+\newpage
+\textbf{Solution:}
+
+\begin{enumerate}
+\item[(a)]
+\textit{Lemma.} For any node $u$, the path $P(u) = \langle p_0, p_1,\cdots,p_m \rangle$ produced by \texttt{visit}$(u)$ satisfies:
+\begin{enumerate}
+    \item The last node $p_m$ is one of the children of $u$.
+    \item The first edge $(p_0, p_1)$ satisfies $d(u, p_1) \le 2r_0$.
+    \item The closing edge $(p_m, u)$ satisfies $d(p_m, u) \le r_0$.
+\end{enumerate}
+
+\textit{Proof.} We prove by induction on the structure of $T$.
+
+\textbf{Base case:} If $u$ is a leaf, $P(u) = \langle u \rangle$, and all three properties hold trivially.
+
+\textbf{Inductive step:} Suppose for each child $u_i$, the path $P(u_i)$ satisfies the lemma. Then:
+\begin{itemize}
+  \item The last node $p_m$ is the first node of $(P(u_k))^R$, which is $u_k$, a child of $u$.
+  \item The first node after $u$ is the last node of $(P(u_1))^R$, which is the last node of $P(u_1)$, say $q_{m_1}$. By inductive hypothesis, $q_{m_1}$ is a descendant of $u_1$. By the triangle inequality:
+  \[
+  d(u, q_{m_1}) \le d(u, u_1) + d(u_1, q_{m_1}) \le r_0 + r_0 = 2r_0.
+  \]
+  \item The closing edge from $p_m$ back to $u$ connects $u_k$ to $u$, and since $u_k$ is a child of $u$, the edge has weight at most $r_0$.
+\end{itemize}
+This completes the inductive proof of the lemma. $\hfill\square$
+
+\medskip
+
+Now consider the edges in the final cycle $C$:
+\begin{itemize}
+  \item \textbf{Internal edges within each $(P(u_i))^R$:}  
+  These edges are either edges within a child subtree or its reverse. Since each subtree path corresponds to traversals in $T$, and every edge in $T$ has weight at most $r_0$, these internal edges are of weight at most $r_0$.
+  
+  \item \textbf{Edges between subpaths:}  
+  When transitioning from the end of $(P(u_i))^R$ to the beginning of $(P(u_{i+1}))^R$, the two nodes involved are $u_i$ (the child just completed) and some descendant $q_{m_{i+1}}$ of $u_{i+1}$. By the triangle inequality:
+  \[
+  d(u_i, q_{m_{i+1}}) \le d(u_i, u) + d(u, q_{m_{i+1}}).
+  \]
+  Since $u_i$ and $u$ are connected by an edge in $T$ of weight at most $r_0$, and from the lemma $d(u, q_{m_{i+1}}) \le 2r_0$, we get:
+  \[
+  d(u_i, q_{m_{i+1}}) \le r_0 + 2r_0 = 3r_0.
+  \]
+  
+  \item \textbf{Closing edge:}  
+  Finally, the edge from $p_m$ (which is $u_k$) back to $u$ has weight at most $r_0$ by the lemma.
+\end{itemize}
+
+Thus, every edge in the constructed cycle $C$ has weight at most $3r_0$.
+
+\item[(b)]
+The algorithm provided in the question yields a polynomial-time, 3-approximation algorithm.
+
+\begin{enumerate}
+  \item[1.] \textbf{Computing \(r_0\).}  
+  We sort all \(\binom{n}{2}\) edge weights in non-decreasing order and scan them, maintaining the connectivity of the subgraph \(G[r]\) using a Union-Find data structure. This allows us to determine the smallest \(r_0\) such that \(G[r_0]\) is connected. The time complexity of this step is \(O(n^2 \log n)\).
+
+  \item[2.] \textbf{Building and traversing the spanning tree.}  
+  Once \(r_0\) is known, we construct any spanning tree \(T\) of \(G[r_0]\) using Prim's algorithm in \(O(n^2)\) time. The recursive \texttt{visit} procedure then generates a path through all nodes in linear time relative to the number of vertices.
+
+  \item[3.] \textbf{Approximation.}  
+  As shown in (a), the final Hamiltonian cycle \(C\) has maximum edge weight at most \(3r_0\). Since any valid Hamiltonian cycle in \(G\) must use only edges of weight \(\le r^*\), where \(r^*\) is the optimal value, and \(r_0 \le r^*\), we conclude:
+  \[
+      \max_{e \in C} d(e) \le 3r_0 \le 3r^*.
+  \]
+\end{enumerate}
+
+Therefore, the algorithm runs in polynomial time and achieves a 3-approximation factor for the problem.
+
+
+\end{enumerate}
 
 
 
-\bigskip
+\newpage
 \item[Problem 10.3:]
 Given a {\em directed\/} graph $G=(V,E)$, we want to find
 a subgraph $A$ that is acyclic (i.e., a dag), maximizing the
@@ -142,6 +276,90 @@ a feasible solution and analyze its expected approximation factor:
 \end{enumerate}
 
 [Note: it may be useful to recall the fact that a directed graph is a dag iff there exists a topological sort.]
+
+\newpage
+\textbf{Solution:}
+\newcommand{\IN}{\textrm{IN}}
+\newcommand{\OUT}{\textrm{OUT}}
+\newcommand{\E}{\mathbb{E}}
+\begin{enumerate}
+\item[(a)]
+\textbf{Feasibility.}
+By construction, every edge inserted into \(A\) goes between \(v_i\) and some
+vertex in \(\{v_1,\dots,v_{i-1}\}\).  If we orient all chosen edges so that they go
+forward in the order \(v_1\prec v_2\prec\cdots\prec v_n\), then no edge ever
+points from a later vertex to an earlier one.  Hence \(A\) admits the topological
+order \(v_1,\dots,v_n\) and is acyclic.
+
+\textbf{\(1/2\)-Approximation.}
+Let \(A\) be the edge set returned by the algorithm, and let \(E^*\) be an optimal
+maximum-cardinality acyclic subgraph of \(G\).
+
+Observe that every edge \((u,v)\) with \(u\neq v\) appears exactly once among
+the union of all \(\IN_i\cup\OUT_i\), namely when the later of \(u,v\)
+is being processed.  Hence
+\[
+\sum_{i=2}^n \bigl(|\IN_i| + |\OUT_i|\bigr)  =  |E|.
+\]
+By the choice in the algorithm, the edges added at step \(i\) is
+\[
+\max\{\,|\IN_i|, |\OUT_i|\,\}
+\ge \frac12\bigl(|\IN_i|+|\OUT_i|\bigr).
+\]
+Summing over \(i\) gives
+\[
+|A|
+= \sum_{i=2}^n \max\{|\IN_i|,|\OUT_i|\}
+\ge \frac12 \sum_{i=2}^n \bigl(|\IN_i|+|\OUT_i|\bigr)
+= \frac12\,|E|.
+\]
+Therefore
+\[
+|A| \ge \frac12\,|E|
+\ge \frac12\,|E^*|,
+\]
+as claimed.
+
+\item[(b)]
+
+\textbf{Feasibility.}
+Let \(\pi\) be the random order of vertices \((v_1, \dots, v_n)\).
+By construction, every edge in \(A\) goes forward in the random order \(\pi\).  Hence \(\pi\) itself is a valid topological sort of the subgraph \((V,A)\), so \((V,A)\) is a DAG.
+
+\textbf{Expected approximation ratio.}
+Let \(E^*\subseteq E\) be an optimal maximum-cardinality acyclic subgraph, so \(|E^*| = \max\{|A'| : (V,A')\text{ is a DAG}\}\).  Note that trivially \(|E^*|\le |E|\).
+
+For any fixed edge \(e=(u\to v)\in E\), under a uniformly random order \(\pi\) we have
+\[
+\Pr\bigl[e\text{ is kept in }A\bigr]
+=\Pr\bigl(u\text{ precedes }v \text{ in }\pi\bigr)
+=\frac12.
+\]
+Define the indicator random variable
+\[
+X_e =
+\begin{cases}
+1,&\text{if }e\in A,\\
+0,&\text{otherwise.}
+\end{cases}
+\]
+Then \(\E[X_e]=\frac12\), and linearity of expectation gives
+\[
+\E\bigl[\,|A|\,\bigr]
+=\E\!\Bigl[\sum_{e\in E}X_e\Bigr]
+=\sum_{e\in E}\E[X_e]
+=\sum_{e\in E}\frac12
+=\frac12\,|E|.
+\]
+Since \(|E|\ge|E^*|\), it follows that
+\[
+\E\bigl[\,|A|\,\bigr]
+=\frac12\,|E|
+\ge \frac12\,|E^*|.
+\]
+The expected approximation factor is \(\frac12\).
+
+\end{enumerate}
 
 \end{description}
 \end{document}
